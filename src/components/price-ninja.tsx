@@ -343,8 +343,8 @@ export function PriceNinja() {
 
             <div className="text-center px-4">
               <blockquote className="border-l-4 border-accent pl-4 italic text-muted-foreground text-left max-w-md mx-auto">
-                <p>"Don’t just sell. Control the numbers like a silent assassin. This formula is your pricing katana — use it to cut through the noise."</p>
-                <cite className="font-bold mt-2 not-italic block text-right">- Batman</cite>
+                <p>"with great pricing comes great profit."</p>
+                <cite className="font-bold mt-2 not-italic block text-right">- Adhithyan</cite>
               </blockquote>
             </div>
           </div>
