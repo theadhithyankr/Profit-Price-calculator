@@ -4,8 +4,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 
 export const metadata: Metadata = {
-  title: 'Price Ninja',
-  description: 'Calculate your selling price to achieve your desired profit.',
+  title: 'Endracle Pricing calculator',
 };
 
 export default function RootLayout({

@@ -38,6 +38,15 @@ import {
   TrendingUp,
   Truck,
 } from "lucide-react";
+import { Pie, PieChart } from "recharts";
+import {
+  ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
+  ChartTooltip,
+  ChartTooltipContent,
+  type ChartConfig,
+} from "@/components/ui/chart";
 
 const formSchema = z.object({
   productDescription: z.string().min(10, { message: "Please provide a more detailed product description." }).default("A high-quality custom t-shirt."),
@@ -51,8 +60,18 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
+const chartConfig = {
+  basePrice: { label: "Base Price", color: "hsl(var(--chart-1))" },
+  packagingCost: { label: "Packaging Cost", color: "hsl(var(--chart-2))" },
+  deliveryCharge: { label: "Delivery Charge", color: "hsl(var(--chart-3))" },
+  gatewayFee: { label: "Payment Gateway Fee", color: "hsl(var(--chart-4))" },
+  profit: { label: "Profit", color: "hsl(var(--chart-5))" },
+} satisfies ChartConfig;
+
+
 export function PriceNinja() {
   const [sellingPrice, setSellingPrice] = useState<number | null>(null);
+  const [chartData, setChartData] = useState<any[]>([]);
   const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
   const [isLoadingAi, setIsLoadingAi] = useState(false);
   const { toast } = useToast();
@@ -69,6 +88,16 @@ export function PriceNinja() {
     const priceBeforeFee = desiredProfit + totalCost;
     const finalPrice = priceBeforeFee / (1 - razorpayFee / 100);
     setSellingPrice(finalPrice);
+
+    const gatewayFeeValue = finalPrice * (razorpayFee / 100);
+    const newChartData = [
+      { component: "basePrice", value: numberOfProducts * basePrice, fill: "var(--color-basePrice)" },
+      { component: "packagingCost", value: numberOfProducts * packagingCost, fill: "var(--color-packagingCost)" },
+      { component: "deliveryCharge", value: numberOfProducts * deliveryCharge, fill: "var(--color-deliveryCharge)" },
+      { component: "gatewayFee", value: gatewayFeeValue, fill: "var(--color-gatewayFee)" },
+      { component: "profit", value: desiredProfit, fill: "var(--color-profit)" },
+    ].filter((d) => d.value > 0);
+    setChartData(newChartData);
   };
 
   const handleAiSuggestion = async () => {
@@ -106,11 +135,8 @@ export function PriceNinja() {
       <div className="container mx-auto px-4 py-8 md:px-8 md:py-12">
         <header className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-extrabold font-headline text-primary tracking-tight">
-            Price Ninja
+            Endracle Pricing calculator
           </h1>
-          <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
-            Your pricing katana. Calculate the perfect selling price to achieve your desired profit.
-          </p>
         </header>
 
         <div className="grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
@@ -256,6 +282,45 @@ export function PriceNinja() {
                   =(Profit + NumProducts*(BasePrice + PkgCost + DelCharge)) / (1 - Fee%/100)
                 </code>
               </CardFooter>
+            </Card>
+            
+            <Card className="shadow-md">
+              <CardHeader>
+                <CardTitle>Price Breakdown</CardTitle>
+                <CardDescription>A visual breakdown of your selling price.</CardDescription>
+              </CardHeader>
+              <CardContent className="flex items-center justify-center">
+                {sellingPrice !== null && chartData.length > 0 ? (
+                  <ChartContainer
+                    config={chartConfig}
+                    className="mx-auto aspect-square h-[250px]"
+                  >
+                    <PieChart>
+                      <ChartTooltip
+                        cursor={false}
+                        content={<ChartTooltipContent
+                          formatter={(value) => `₹${Number(value).toFixed(2)}`}
+                          hideLabel
+                        />}
+                      />
+                      <Pie
+                        data={chartData}
+                        dataKey="value"
+                        nameKey="component"
+                        innerRadius={60}
+                        strokeWidth={2}
+                      />
+                      <ChartLegend
+                        content={<ChartLegendContent nameKey="component" />}
+                      />
+                    </PieChart>
+                  </ChartContainer>
+                ) : (
+                  <div className="h-[250px] flex items-center justify-center text-muted-foreground">
+                    <p>Calculate a price to see the breakdown.</p>
+                  </div>
+                )}
+              </CardContent>
             </Card>
 
             <Card className="shadow-md">
